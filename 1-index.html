@@ -1,0 +1,158 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spirit-Filled Worshippers - interactive sermon (English sample)</title>
+<style>
+*{box-sizing:border-box;margin:0}html,body{height:100%;background:#000;overflow:hidden;font-family:Georgia,"Times New Roman",serif;-webkit-tap-highlight-color:transparent}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{position:relative;width:1280px;height:720px;flex:none;overflow:hidden;background:#222}
+#cv{position:absolute;inset:0;width:1280px;height:720px}
+#box{position:absolute;inset:0;padding:64px 80px;display:flex;flex-direction:column;justify-content:center;transition:opacity .5s}
+.ink{color:#1a2a72}.lt{color:#fff;text-shadow:0 2px 14px #0007}
+.ln{opacity:0;transform:translateY(22px);transition:opacity .8s,transform .8s;line-height:1.34;margin:.4em 0;font-style:italic}
+.ln.on{opacity:1;transform:none}
+.ref{font-size:32px;font-style:normal;letter-spacing:.06em;text-align:center;margin-bottom:.5em;border-bottom:2px solid currentColor;padding-bottom:.25em;align-self:center}
+.title{text-align:center;font-weight:700;font-size:92px;line-height:1.1;font-style:italic}
+.title.sm{font-size:70px}
+mark{background:linear-gradient(transparent 12%,#ffe24a 12%,#ffe24a 92%,transparent 92%);background-repeat:no-repeat;background-size:0% 100%;color:inherit;padding:0 .12em;transition:background-size .8s .5s;font-weight:700;font-style:italic}
+.on mark,mark.on{background-size:100% 100%}
+.lt mark{color:#1a2a72}
+.ring{position:relative;display:inline-block;font-weight:700}
+.ring::after{content:"";position:absolute;inset:-1px -12px;border:3px solid #c0392b;border-radius:50%;opacity:0;transform:scale(1.5) rotate(-3deg);transition:all .6s .7s}
+.on .ring::after{opacity:1;transform:scale(1) rotate(-3deg)}
+.ln b{font-weight:700}
+.n{margin-right:.4em;font-weight:700}
+.pur{background:linear-gradient(120deg,#4c2a7a,#7a3d9a);color:#fff;padding:.5em .9em;border-radius:22px;text-shadow:none;box-shadow:0 8px 24px #0004}
+.pur mark{color:#1a2a72}
+.note{background:#f8e9c1;border:2px solid #c9a24a;border-radius:10px;padding:.5em .9em;box-shadow:0 6px 18px #0003}
+.narrow{max-width:760px}.mid{max-width:880px}
+.head{font-size:58px;font-weight:700;margin-bottom:.3em;text-align:center;font-style:italic}
+.small .ln{margin:.2em 0}
+#deco{position:absolute;right:50px;bottom:30px;width:300px;height:340px;opacity:0;transition:opacity 1s .4s,transform 1s .4s;transform:translateY(30px)}
+#deco.on{opacity:1;transform:none}
+#flash{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 50%,#fff3c8 0,#e6b95099 40%,transparent 70%)}
+#flash.go{animation:fl .8s ease-out}@keyframes fl{0%{opacity:.95;transform:scale(.2)}100%{opacity:0;transform:scale(2.4)}}
+#foot{position:absolute;bottom:12px;left:20px;font:13px Arial;opacity:.6;color:#fff;mix-blend-mode:difference}
+#bar{position:fixed;bottom:0;left:0;height:4px;background:#e6b950;z-index:20;transition:width .5s}
+#ui{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:20}
+#ui button{background:#0a1633d9;color:#e6b950;border:1px solid #e6b95088;border-radius:6px;padding:8px 12px;font-size:15px;cursor:pointer;min-width:42px}
+#ui button:focus-visible{outline:2px solid #fff}
+#notes{position:fixed;left:12px;right:12px;bottom:58px;background:#0a1633ee;color:#f4ecd8;border:1px solid #e6b95066;border-radius:8px;padding:12px 16px;font:16px/1.4 Arial,sans-serif;z-index:20;display:none}
+#help{position:fixed;top:10px;right:14px;color:#fff;font:13px Arial;z-index:20;mix-blend-mode:difference}
+#ov{position:fixed;inset:0;background:#0a1633f2;z-index:30;display:none;overflow:auto;padding:40px 24px 80px}
+#ov h3{color:#e6b950;font:20px Georgia;margin-bottom:16px;text-align:center}
+#ov .g{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;max-width:1100px;margin:0 auto}
+#ov button{background:#10224a;color:#f4ecd8;border:1px solid #e6b95055;border-radius:8px;padding:10px;text-align:left;font:14px/1.3 Arial;cursor:pointer;min-height:64px}
+#ov button b{color:#e6b950;display:block;margin-bottom:3px}
+</style></head><body>
+<div id="wrap"><div id="stage"><canvas id="cv" width="1280" height="720"></canvas><div id="deco"></div><div id="box"></div><div id="flash"></div><div id="foot"></div></div></div>
+<div id="notes"></div><div id="bar"></div><div id="ov"><h3>Jump to a scene</h3><div class="g" id="og"></div></div>
+<div id="ui"><button id="bp" title="Back">←</button><button id="ba" title="Autoplay (P)">▶ Auto</button><button id="bn" title="Next (→ or space)">→</button><button id="bo" title="Notes (N)">Notes</button><button id="bg" title="All scenes (O)">▦</button><button id="bf" title="Fullscreen (F)">⛶</button><button id="bm" title="Calm mode (M)">Calm</button></div>
+<div id="help">→ reveal next line · ← back · P auto · O scenes · N notes · F full · M calm</div>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)},st=$('stage'),cx=$('cv').getContext('2d'),box=$('box');
+var calm=matchMedia('(prefers-reduced-motion: reduce)').matches,TOFF=0;
+function fit(){var s=Math.min(innerWidth/1280,innerHeight/720);st.style.transform='scale('+s+')'}addEventListener('resize',fit);fit();
+var DECO={
+crown:'<svg viewBox="0 0 300 340"><g transform="translate(20,150)"><path d="M10 120 L0 20 L60 70 L130 0 L200 70 L260 20 L250 120Z" fill="#e8b93c" stroke="#9a6f10" stroke-width="4"/><rect x="8" y="112" width="244" height="26" rx="6" fill="#d19a22" stroke="#9a6f10" stroke-width="4"/><circle cx="130" cy="95" r="12" fill="#2a58c8"/><circle cx="70" cy="100" r="8" fill="#c0392b"/><circle cx="190" cy="100" r="8" fill="#c0392b"/></g><path d="M0 340 Q80 270 170 290 Q250 270 300 340Z" fill="#4c3a8c" opacity=".8"/></svg>',
+harp:'<svg viewBox="0 0 300 340"><path d="M70 330 C20 250 30 120 120 40 C170 0 240 20 240 70 C240 110 200 120 190 150 L150 330Z" fill="none" stroke="#c9922a" stroke-width="14" stroke-linejoin="round"/><g stroke="#8a5a14" stroke-width="3"><line x1="110" y1="70" x2="85" y2="300"/><line x1="140" y1="52" x2="105" y2="300"/><line x1="170" y1="44" x2="125" y2="300"/><line x1="200" y1="44" x2="145" y2="300"/><line x1="225" y1="55" x2="165" y2="300"/></g></svg>',
+window:'<svg viewBox="0 0 300 340"><path d="M30 340V120Q30 20 150 20Q270 20 270 120V340Z" fill="#6a5a6a" stroke="#4a3a4a" stroke-width="8"/><path d="M60 340V125Q60 50 150 50Q240 50 240 125V340Z" fill="#2c2438"/><circle cx="150" cy="170" r="34" fill="#c9a07a"/><path d="M100 340Q100 235 150 225Q200 235 200 340Z" fill="#7a4a9a"/><path d="M112 165Q150 105 188 165Q170 130 150 130Q130 130 112 165Z" fill="#6a3d8a"/></svg>',
+dove:'<svg viewBox="0 0 300 200"><g fill="#fff" stroke="#f4e6b8" stroke-width="3"><path d="M150 110C110 70 50 60 10 80 50 80 80 100 110 125 90 130 70 140 50 160 90 150 120 145 150 150Z"/><path d="M150 110C190 70 250 60 290 80 250 80 220 100 190 125 210 130 230 140 250 160 210 150 180 145 150 150Z"/><ellipse cx="150" cy="128" rx="30" ry="24"/><circle cx="150" cy="96" r="14"/></g><path d="M162 94 L180 100 L162 104Z" fill="#e6b950"/></svg>'};
+// markup: **mark**  [[ring]]
+function mk(s){return s.replace(/\*\*(.+?)\*\*/g,'<mark>$1</mark>').replace(/\[\[(.+?)\]\]/g,'<span class="ring">$1</span>')}
+var T='SERMON';
+var S=[
+{k:'title',bg:'parch',deco:'harp',lines:['What matters most<br>in the <mark>church</mark>?'],src:1,ink:1,cls:'title',foot:'English conversion of the 15 Nov 2026 sermon deck · interactive sample'},
+{k:'verse',bg:'water',lt:1,ref:'Ephesians 5:18-20',lines:['Do not get drunk with wine, which leads to excess; instead, be filled with the **Holy Spirit**.','Speak to one another in psalms, hymns and spiritual songs, singing and making melody to the Lord with your heart.','Always give thanks to God the Father in the name of our Lord Jesus Christ.'],src:3,fs:36},
+{k:'title',bg:'glory',lt:1,deco:'dove',lines:['Spirit-Filled','<mark style="color:#5a3a00">Worshippers</mark>'],src:4,cls:'title'},
+{k:'verse',bg:'parch',ink:1,ref:'2 Samuel 6',lines:['<span class="n">12</span>[[Someone]] told King David, “The LORD has blessed the house of [[Obed-edom]] and everything he has, **because of the ark of God**.” So David went and brought up the ark of God from the house of Obed-edom to the city of David [[with rejoicing]].'],src:5,fs:38},
+{k:'list',bg:'dawn',ink:1,deco:'crown',lines:['<span class="n">1.</span>What kind of “<mark>someone</mark>” are we?','<span class="n">2.</span>Do not give the <mark>glory to people</mark>.','<span class="n">3.</span>When we come before God, it should not be only to finish a religious duty, but to <mark>come joyfully, expecting God’s presence</mark>.'],src:6,fs:40},
+{k:'verse',bg:'parch',ink:1,ref:'2 Samuel 6',lines:['<span class="n">13</span>When those who carried the ark of the LORD had gone [[six steps]], David sacrificed a bull and a fattened calf as an [[offering]].'],src:7,fs:46},
+{k:'list',bg:'dawn',ink:1,deco:'harp',lines:['<span class="n">1.</span>David did not forget <mark>the lesson from before</mark>.','<span class="n">2.</span>Do not take <mark>God’s favor</mark> for granted.','<div class="mid"><mark>True worship</mark> is not only full of joy, but also full of <mark>gratitude and reverence</mark>.</div>'],src:8,fs:42},
+{k:'verse',bg:'parch',ink:1,ref:'2 Samuel 6',lines:['<span class="n">14</span>David, wearing a linen ephod, [[danced with all his might]] before the LORD.','<span class="n">15</span>So David and [[the whole house]] of Israel brought up the ark of the LORD with shouts of joy and the sound of the horn.'],src:9,fs:40},
+{k:'list',bg:'dawn',ink:1,deco:'harp',lines:['<span class="n">1.</span>Joy should <mark>flow naturally</mark>.','<span class="n">2.</span>We care too much about <mark>what others think</mark>.','<span class="n">3.</span>What kind of <mark>worship atmosphere</mark> will you choose?','<div class="mid">A true worshipper can also bring <mark>joy</mark> and a <mark>longing for God</mark> to others.</div>'],src:10,fs:40},
+{k:'verse',bg:'parch',ink:1,deco:'window',ref:'2 Samuel 6',lines:['<span class="n">16</span>As the ark of the LORD came into the city of David, Michal daughter of Saul looked out from [[the window]] and saw King David leaping and dancing before the LORD, and in her heart she [[despised]] him.'],src:11,fs:38,narrow:1},
+{k:'list',bg:'dawn',ink:1,deco:'window',lines:['<span class="n">1.</span>Michal once <mark>loved David deeply</mark>.','<span class="n">2.</span>Why was Michal <mark>only watching from the window</mark>?','<span class="n">3.</span>Could we be <mark>like Michal</mark>?','<span class="n">4.</span>Those who serve cannot be <mark>mere spectators</mark>.','<span class="n">5.</span>Do not treat the earlier praise as <mark>just an ordinary opening act</mark>.'],src:12,fs:34,narrow:1},
+{k:'list',bg:'dawn',ink:1,deco:'harp',lines:['<span class="n">1.</span>Do not treat others’ worship as <mark>a performance</mark>.','<span class="n">2.</span>Why can we go wild over things of the world, yet not <mark>rejoice for God</mark>?','<span class="n">3.</span><mark>Fleshly worship</mark> and <mark>fleshly judgment</mark>.','<span class="n">4.</span>Do not carelessly <mark>criticize those who serve</mark>.','<span class="n">5.</span>Do not <mark>spread negative talk</mark> after the gathering ends.'],src:13,fs:34,narrow:1},
+{k:'verse',bg:'parch',ink:1,ref:'2 Samuel 6',lines:['<span class="n">17</span>They brought in the ark of the LORD and set it in its place, inside the tent David had pitched for it. David offered burnt offerings and peace offerings before the LORD.','<span class="n">18</span>When he had finished, he <b>[[blessed the people in the name of the LORD of hosts]]</b>.','<span class="n">19</span>He gave to everyone, [[the whole crowd of Israel, men and women alike]], a loaf of bread, a date cake and a raisin cake. Then all the people went home.'],src:14,fs:29},
+{k:'list',bg:'dawn',ink:1,deco:'crown',lines:['<span class="n">1.</span>True worship <mark>does not stop at the gathering</mark>.','<span class="n">2.</span>David blessed the people <mark>in the name of God</mark>.','<span class="n">3.</span>David made sure everyone <mark>received a blessing</mark>.'],src:15,fs:44},
+{k:'verse',bg:'parch',ink:1,deco:'window',ref:'2 Samuel 6',lines:['<span class="n">20</span>David returned to bless [[his own household]]. Michal daughter of Saul came out to meet him and said, “How glorious the king of Israel was today! He uncovered himself in front of his servants’ maids, like a worthless man shamelessly uncovering himself!”'],src:16,fs:34,narrow:1},
+{k:'title',bg:'dawn',ink:1,deco:'crown',lines:['When you go home,<br>do you bring the<br><mark>blessing</mark> with you?'],src:17,cls:'title sm',narrow:0},
+{k:'list',bg:'dawn',ink:1,deco:'crown',lines:['<span class="n">1.</span>Michal attacked David with <mark>sarcastic words</mark>.','<span class="n">2.</span>Sometimes the ones who hurt us most easily are <mark>those closest to us</mark>.'],src:18,fs:44},
+{k:'verse',bg:'parch',ink:1,deco:'window',ref:'2 Samuel 6',lines:['<span class="n">21</span>David said to Michal, “It was [[before the LORD]] who chose me over your father and all his house, and appointed me leader over Israel, the LORD’s people. So I will dance and make merry [[before the LORD]].”'],src:19,fs:34,narrow:1},
+{k:'list',bg:'dawn',ink:1,deco:'harp',lines:['<span class="n">1.</span>David said: I was <mark>before the LORD</mark>.','<span class="n">2.</span>Do not let others’ criticism decide your <mark>spiritual life</mark>.','<span class="n">3.</span>What matters most is <mark>how God sees us</mark>.','<div class="note" style="font-size:.78em;margin-top:.5em">“I would rather stand on God’s side and take the world’s criticism, than stand on the world’s side and face <b style="color:#b0281c">God’s judgment</b>.”</div>'],src:20,fs:38,narrow:1},
+{k:'title',bg:'dawn',ink:1,lines:['Not everyone’s <mark>applause</mark><br>means <mark>God is pleased</mark>.','Nor does every <mark>criticism</mark><br>mean we have <mark>done wrong</mark>.'],src:21,cls:'title sm',stack:1},
+{k:'verse',bg:'parch',ink:1,deco:'crown',ref:'2 Samuel 6',lines:['<span class="n">22</span>I will make myself [[even more undignified than this]], and I will be humble in my own eyes. But by the maids you spoke of, I will be held in honor.'],src:22,fs:42,narrow:1},
+{k:'list',bg:'dawn',ink:1,deco:'harp',lines:['<div style="font-size:.7em;font-style:normal;font-weight:700;letter-spacing:.05em">What David meant:</div>','“Even if you think I do not look like a king, I am willing to be <mark>even more humble</mark> before God.”','“I <mark>do not need</mark> my throne and status to prove how important I am.”','“I am willing to set down my glory and <mark>give the glory to God</mark>.”'],src:23,fs:38,narrow:1},
+{k:'verse',bg:'parch',ink:1,deco:'window',ref:'2 Samuel 6',lines:['<span class="n">23</span>And Michal daughter of Saul had [[no child]] to the day of her death.'],src:24,fs:56,narrow:1},
+{k:'list',bg:'dawn',ink:1,deco:'harp',lines:['<span class="n">1.</span>She was <mark>not far</mark> from God’s worship.','<span class="n">2.</span>Are you a <mark>worshipper</mark>, or a <mark>spectator</mark>?'],src:25,fs:54,narrow:1},
+{k:'list',bg:'dawn',ink:1,deco:'crown',lines:['When others worship God, are you <mark>taking part</mark> or <mark>watching</mark>?','When others serve eagerly, are you <mark>encouraging</mark> or <mark>criticizing</mark>?','When God’s word comes, do you <mark>receive it humbly</mark> or <mark>judge others</mark>?','When God blesses the church, are you <mark>thankful</mark> or <mark>comparing</mark>?','When someone’s life changes, do you <mark>rejoice</mark> or <mark>look on coldly</mark>?','<div class="pur" style="font-size:.82em">May we not be like Michal, standing by the window watching others worship, with <mark>no heart that truly worships</mark>.</div>'],src:26,fs:27},
+{k:'cmp',bg:'dawn',ink:1,deco:'crown',head:'The worshipper: David',lines:['<b>Longing for God</b>: treasuring His presence.','<b>Reverent and obedient</b>: following God’s word.','<b>Thankful and joyful</b>: praising God sincerely and freely.','<b>Humble</b>: setting down face and status.','<b>Blessing others</b>: bringing love into family and life.','<b>Steadfast in loving God</b>: not losing passion because of criticism.'],src:27,fs:30,narrow:1},
+{k:'cmp',bg:'dawn',ink:1,deco:'window',head:'The judge: Michal',lines:['<b>Cold onlooker</b>: no longing for God.','<b>Proud and self-righteous</b>: judging others by her own standards.','<b>Looking down on others</b>: criticizing their worship.','<b>Cares about face</b>: values status and what others think.','<b>Hurtful words</b>: sarcasm, complaint, judgment.','<b>Joyless</b>: sees only problems, little gratitude.'],src:28,fs:30,narrow:1}
+];
+var N=S.length,cur=0,shown=0,auto=false,timers=[];
+// canvas backgrounds
+var motes=[],i;for(i=0;i<70;i++)motes.push({x:Math.random()*1280,y:Math.random()*720,r:Math.random()*2.5+.6,s:Math.random()*.5+.15,p:Math.random()*6.28});
+var t0=performance.now();
+function lg(a,b,stops){var g=cx.createLinearGradient(0,a,0,b);stops.forEach(function(s){g.addColorStop(s[0],s[1])});return g}
+function hills(t,c1,c2){cx.fillStyle=c2;cx.beginPath();cx.moveTo(0,720);for(var x=0;x<=1280;x+=40)cx.lineTo(x,600-Math.sin(x/190+1)*34-Math.sin(x/70)*8);cx.lineTo(1280,720);cx.fill();cx.fillStyle=c1;cx.beginPath();cx.moveTo(0,720);for(var x2=0;x2<=1280;x2+=40)cx.lineTo(x2,650-Math.sin(x2/130+3)*26);cx.lineTo(1280,720);cx.fill()}
+var BG={
+parch:function(t){cx.fillStyle=lg(0,720,[[0,'#f8ebc9'],[1,'#e8cd97']]);cx.fillRect(0,0,1280,720);var g=cx.createRadialGradient(300,100,10,300,100,700);g.addColorStop(0,'rgba(255,250,225,.7)');g.addColorStop(1,'rgba(255,250,225,0)');cx.fillStyle=g;cx.fillRect(0,0,1280,720);
+ cx.strokeStyle='rgba(255,255,255,.18)';cx.lineWidth=60;cx.beginPath();cx.moveTo(-100,-50+Math.sin(t*.3)*20);cx.lineTo(500,800);cx.stroke();
+ motes.forEach(function(m){var y=(m.y-t*m.s*30+720*4)%720;cx.fillStyle='rgba(255,240,190,'+(.25+.25*Math.sin(t+m.p))+')';cx.beginPath();cx.arc(m.x+Math.sin(t*.5+m.p)*14,y,m.r,0,6.28);cx.fill()});
+ var v=cx.createRadialGradient(640,360,350,640,360,820);v.addColorStop(0,'rgba(120,80,20,0)');v.addColorStop(1,'rgba(120,80,20,.28)');cx.fillStyle=v;cx.fillRect(0,0,1280,720)},
+dawn:function(t){cx.fillStyle=lg(0,720,[[0,'#cdbfee'],[.55,'#f6d8c0'],[1,'#f9d78c']]);cx.fillRect(0,0,1280,720);
+ var g=cx.createRadialGradient(1050,560,10,1050,560,520);g.addColorStop(0,'rgba(255,238,170,.95)');g.addColorStop(1,'rgba(255,238,170,0)');cx.fillStyle=g;cx.fillRect(0,0,1280,720);
+ for(var k=0;k<4;k++){var x=((t*14+k*380)%1700)-250,y=90+k*70;cx.fillStyle='rgba(255,255,255,.4)';[0,40,85,125].forEach(function(o,j){cx.beginPath();cx.ellipse(x+o,y+(j%2)*8,60-j*6,26,0,0,6.28);cx.fill()})}
+ hills(t,'#8a7ab0','#b9a6cf')},
+water:function(t){cx.fillStyle=lg(0,720,[[0,'#13a8de'],[1,'#064a8c']]);cx.fillRect(0,0,1280,720);
+ cx.lineWidth=2;for(var k=0;k<14;k++){cx.strokeStyle='rgba(255,255,255,'+(.05+.04*Math.sin(t+k))+')';cx.beginPath();for(var x=0;x<=1280;x+=20){var y=k*55+Math.sin(x/90+t*.8+k)*22+Math.sin(x/37-t)*8;x?cx.lineTo(x,y):cx.moveTo(x,y)}cx.stroke()}
+ for(var r=0;r<5;r++){var gx=200+r*250+Math.sin(t*.4+r)*60;var gg=cx.createLinearGradient(gx,0,gx+160,720);gg.addColorStop(0,'rgba(255,255,255,.22)');gg.addColorStop(1,'rgba(255,255,255,0)');cx.fillStyle=gg;cx.beginPath();cx.moveTo(gx,0);cx.lineTo(gx+90,0);cx.lineTo(gx+260,720);cx.lineTo(gx+120,720);cx.fill()}
+ motes.forEach(function(m){var y=720-((t*m.s*60+m.y)%760);cx.strokeStyle='rgba(255,255,255,.55)';cx.lineWidth=1.2;cx.beginPath();cx.arc(m.x+Math.sin(t+m.p)*10,y,m.r*2,0,6.28);cx.stroke()})},
+glory:function(t){cx.fillStyle=lg(0,720,[[0,'#1b1230'],[.6,'#5a3a2a'],[1,'#c89038']]);cx.fillRect(0,0,1280,720);
+ cx.save();cx.translate(640,60);for(var k=0;k<14;k++){cx.rotate(Math.PI*2/14);var a=.1+.08*Math.sin(t*.7+k);cx.fillStyle='rgba(255,226,140,'+a+')';cx.beginPath();cx.moveTo(0,0);cx.lineTo(-60,900);cx.lineTo(60,900);cx.fill()}cx.restore();
+ var g=cx.createRadialGradient(640,100,10,640,100,420);g.addColorStop(0,'rgba(255,245,200,.9)');g.addColorStop(1,'rgba(255,220,120,0)');cx.fillStyle=g;cx.fillRect(0,0,1280,720);
+ motes.forEach(function(m){var y=720-((t*m.s*50+m.y)%760);cx.fillStyle='rgba(255,230,150,'+(.3+.3*Math.sin(t*2+m.p))+')';cx.beginPath();cx.arc(m.x,y,m.r,0,6.28);cx.fill()})}
+};
+function loop(now){var t=calm?5:(now-t0)/1000+TOFF;BG[S[cur].bg](t);requestAnimationFrame(loop)}requestAnimationFrame(loop);
+function clr(){timers.forEach(clearTimeout);timers=[]}
+function lines(){return box.querySelectorAll('.ln')}
+function render(n,all){var s=S[n];cur=n;shown=0;clr();
+ var h='';if(s.k==='verse')h+='<div class="ref '+(s.lt?'lt':'ink')+'">'+s.ref+'</div>';
+ if(s.k==='cmp')h+='<div class="head ink">'+s.head+'</div>';
+ s.lines.forEach(function(l){h+='<div class="ln '+(s.cls||'')+'">'+mk(l)+'</div>'});
+ box.className=(s.lt?'lt':'ink')+(s.stack?'':'')+' small';
+ box.innerHTML=h;box.style.fontSize=(s.fs||44)+'px';
+ box.style.justifyContent='center';box.style.alignItems=s.k==='title'?'center':'stretch';
+ box.style.paddingRight=s.deco&&s.deco!=='dove'&&s.k!=='title'||(s.narrow)?'400px':'80px';
+ if(s.k==='title'&&s.deco==='harp')box.style.paddingRight='80px';
+ var d=$('deco');d.className='';d.innerHTML=s.deco?DECO[s.deco]:'';
+ if(s.deco==='dove'){d.style.cssText='right:490px;top:6px;bottom:auto;width:300px;height:200px'}else{d.style.cssText=''}
+ if(s.deco==='harp'&&s.k==='title'){d.style.cssText='right:40px;bottom:20px;width:260px;height:300px'}
+ void d.offsetWidth;if(s.deco)d.className='on';
+ $('foot').textContent=s.foot||'';
+ $('notes').textContent=(n+1)+'/'+N+'  Original slide '+s.src+' of 28 (slide 2 is blank in the source deck). Press → to reveal each line, then move on.';
+ $('bar').style.width=((n+1)/N*100)+'%';
+ var f=$('flash');f.classList.remove('go');void f.offsetWidth;if(!calm&&!all)f.classList.add('go');
+ if(all){[].forEach.call(lines(),function(e){e.classList.add('on')});shown=s.lines.length}
+ else{reveal()}}
+function reveal(){var L=lines();if(shown<L.length){L[shown].classList.add('on');shown++;return true}return false}
+function advance(fromAuto){if(!reveal()){if(cur<N-1)render(cur+1);else{stopAuto();return}}if(auto)sched()}
+function sched(){clr();var L=lines();timers.push(setTimeout(function(){if(auto)advance(true)},calm?1500:(shown>=L.length?4200:2600)))}
+function stopAuto(){auto=false;$('ba').textContent='▶ Auto';clr()}
+function manual(f){stopAuto();f()}
+$('bn').onclick=function(e){e.stopPropagation();manual(function(){advance()})};
+$('bp').onclick=function(e){e.stopPropagation();manual(function(){if(shown>1){var L=lines();shown--;L[shown].classList.remove('on')}else if(cur>0)render(cur-1,true)})};
+$('ba').onclick=function(e){e.stopPropagation();auto=!auto;$('ba').textContent=auto?'❚❚ Pause':'▶ Auto';if(auto){if(cur===N-1&&shown>=lines().length)render(0);sched()}else clr()};
+$('bo').onclick=function(e){e.stopPropagation();var n=$('notes');n.style.display=n.style.display==='block'?'none':'block'};
+$('bf').onclick=function(e){e.stopPropagation();var d=document.documentElement;if(document.fullscreenElement)document.exitFullscreen();else if(d.requestFullscreen)d.requestFullscreen()};
+$('bm').onclick=function(e){e.stopPropagation();calm=!calm;$('bm').style.background=calm?'#e6b95055':''};
+var og=$('og');S.forEach(function(s,k){var b=document.createElement('button');var txt=(s.ref?s.ref+': ':'')+s.lines[0].replace(/<[^>]+>/g,'').replace(/\*\*|\[\[|\]\]/g,'');b.innerHTML='<b>Scene '+(k+1)+'</b>'+txt.slice(0,52);b.onclick=function(e){e.stopPropagation();$('ov').style.display='none';manual(function(){render(k)})};og.appendChild(b)});
+$('bg').onclick=function(e){e.stopPropagation();$('ov').style.display='block'};
+$('ov').onclick=function(e){if(e.target===$('ov'))$('ov').style.display='none'};
+addEventListener('keydown',function(e){var k=e.key;if(k==='Escape')$('ov').style.display='none';else if(k==='ArrowRight'||k===' '||k==='PageDown'){e.preventDefault();$('bn').click()}else if(k==='ArrowLeft'||k==='PageUp')$('bp').click();else if(k==='p'||k==='P')$('ba').click();else if(k==='n'||k==='N')$('bo').click();else if(k==='o'||k==='O')$('bg').click();else if(k==='f'||k==='F')$('bf').click();else if(k==='m'||k==='M')$('bm').click()});
+var tx=0;addEventListener('touchstart',function(e){tx=e.touches[0].clientX},{passive:true});addEventListener('touchend',function(e){var d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50)(d<0?$('bn'):$('bp')).click()},{passive:true});
+$('wrap').addEventListener('click',function(){$('bn').click()});
+var q=location.hash.match(/s=(\d+)/),mt=location.hash.match(/t=(\d+)/),all=/all=1/.test(location.hash);if(mt)TOFF=+mt[1];
+render(q?+q[1]:0,all);
+})();
+</script></body></html>
